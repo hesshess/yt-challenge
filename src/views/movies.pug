@@ -1,0 +1,11 @@
+extends templates/layout
+include mixins/movie
+
+block content
+  h1=pageTitle
+  form(action="/filter", method="GET")
+    input(placeholder="Filter by year", type="text" name="year")
+    input(placeholder="Filter by rating", type="number" name="rating")
+    button Search
+  each movie in movies
+    +movieMixin(movie)
