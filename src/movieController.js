@@ -1,9 +1,4 @@
-import {
-  getMovieById,
-  getMovies,
-  getMovieByMinimumRating,
-  getMovieByMinimumYear
-} from "./db";
+import { getMovieById, getMovies, addMovie } from "./db";
 
 export const home = (req, res) =>
   res.render("movies", { movies: getMovies(), pageTitle: "Movies!" });
@@ -16,28 +11,36 @@ export const movieDetail = (req, res) => {
   if (!movie) {
     res.render("404", { pageTitle: "Movie not found" });
   }
-  return res.render("detail", { movie, pageTitle: movie.title });
+  return res.render("detail", { movie });
 };
 
-export const filterMovie = (req, res) => {
-  const {
-    query: { year, rating }
-  } = req;
-  if (year) {
-    const movies = getMovieByMinimumYear(year);
-    return res.render("movies", {
-      pageTitle: `Searching by year: ${year}`,
-      searchingBy: "year",
-      searchingTerm: year,
-      movies
-    });
-  }
-  if (rating) {
-    const movies = getMovieByMinimumRating(rating);
-    return res.render("movies", {
-      pageTitle: `Searching by rating: ${rating}`,
-      movies
-    });
-  }
-  res.render("404", { pageTitle: "Movie not found" });
+/*
+Write the controller or controllers you need to render the form
+and to handle the submission
+*/
+
+export const getAdd = (req, res) =>
+  res.render("add", { pageTitle: "Add Movie" });
+
+export const postAdd = (req, res) => {
+  const { title, synopsis, genre } = req.body;
+  console.log(title, synopsis, genre);
+  /*
+This adds a movie to the DB.
+Only ONE required argument, it should be an object containing
+  title: string;
+  synopsis: string;
+  genres: Array of strings;
+*/
+
+  const genreNoSpace = genre.replace(/ /g, "");
+  const genres = genreNoSpace.split(",");
+  const movieObj = {
+    title,
+    synopsis,
+    genres
+  };
+  addMovie(movieObj);
+
+  return res.redirect("/");
 };
