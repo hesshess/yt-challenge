@@ -1,46 +1,81 @@
-import { getMovieById, getMovies, addMovie } from "./db";
+/*
+You DONT have to import the Movie with your username.
+Because it's a default export we can nickname it whatever we want.
+So import Movie from "./models"; will work!
+You can do Movie.find() or whatever you need like normal!
+*/
+import Movie from "./models/Movie";
 
-export const home = (req, res) =>
-  res.render("movies", { movies: getMovies(), pageTitle: "Movies!" });
-
-export const movieDetail = (req, res) => {
+// Add your magic here!
+export const home = async (req, res) => {
+  const movies = await Movie.find({});
+  res.render("movies", { pageTitle: "Home", movies });
+};
+export const create = async (req, res) => {
+  if (req.method === "GET") {
+    res.render("create", { pageTitle: "Create" });
+  } else if (req.method === "POST") {
+    const {
+      body: { title, summary, year, rating, genres }
+    } = req;
+    const newMovie = await Movie.create({
+      title,
+      summary,
+      year,
+      rating,
+      genres: genres.split(",")
+    });
+    res.redirect(`/${newMovie.id}`);
+  }
+};
+export const detail = async (req, res) => {
   const {
     params: { id }
   } = req;
-  const movie = getMovieById(id);
-  if (!movie) {
-    res.render("404", { pageTitle: "Movie not found" });
-  }
-  return res.render("detail", { movie });
+  const movie = await Movie.findById(id);
+  res.render("detail", { movie, pageTitle: movie.title });
 };
 
-/*
-Write the controller or controllers you need to render the form
-and to handle the submission
-*/
+export const edit = async (req, res) => {
+  const {
+    params: { id }
+  } = req;
+  if (req.method === "GET") {
+    const movie = await Movie.findById(id);
+    res.render("edit", { pageTitle: "Edt", movie });
+  } else if (req.method === "POST") {
+    const {
+      body: { title, synopsis, year, rating, genres },
+      params: { id }
+    } = req;
+    await Movie.findByIdAndUpdate(id, {
+      title,
+      synopsis,
+      year,
+      rating,
+      genres: genres.split(",")
+    });
+    res.redirect(`/${id}`);
+  }
+};
 
-export const getAdd = (req, res) =>
-  res.render("add", { pageTitle: "Add Movie" });
+export const remove = async (req, res) => {
+  const {
+    params: { id }
+  } = req;
+  await Movie.findByIdAndDelete(id);
+  res.redirect("/");
+};
 
-export const postAdd = (req, res) => {
-  const { title, synopsis, genre } = req.body;
-  console.log(title, synopsis, genre);
-  /*
-This adds a movie to the DB.
-Only ONE required argument, it should be an object containing
-  title: string;
-  synopsis: string;
-  genres: Array of strings;
-*/
-
-  const genreNoSpace = genre.replace(/ /g, "");
-  const genres = genreNoSpace.split(",");
-  const movieObj = {
-    title,
-    synopsis,
-    genres
-  };
-  addMovie(movieObj);
-
-  return res.redirect("/");
+export const search = async (req, res) => {
+  const {
+    query: { title }
+  } = req;
+  const movies = await Movie.find({
+    title: { $regex: new RegExp(`${title}$`, "i") }
+  });
+  res.render("search", {
+    pageTitle: `Filtering by title: ${title}`,
+    movies
+  });
 };

@@ -1,5 +1,6 @@
 {
-  "name": "a11solution",
+  "name": "a11blueprint",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.js",
