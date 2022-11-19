@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 /*
 PLEASE ADD YOUR USERNAME IN THIS LINE.
@@ -6,27 +7,14 @@ ALL THE MODELS YOU WILL CREATE WILL HAVE YOUR USERNAME APPENDED TO THEM
 SO YOU CAN SEARCH / ADD / EDIT / DELETE YOUR DOCUMENTS ONLY.
 PLEASE FOLLOW THIS STEP
 WE NEED TO SHARE THE SAME DB SO NICO CAN CHECK OUT EVERYBODYS PROJECT.
+🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧
 */
-const YOUR_USERNAME = "serranoarevalo";
+const YOUR_USERNAME = "";
 
-const MovieSchema = mongoose.Schema({
-  title: {
-    type: String,
-    required: true
-  },
-  summary: {
-    type: String,
-    required: true
-  },
-  year: {
-    type: Number,
-    required: true
-  },
-  rating: {
-    type: Number,
-    required: true
-  },
-  genres: [String]
+const UserSchema = mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  name: { type: String, required: true }
 });
 
 if (YOUR_USERNAME === null || typeof YOUR_USERNAME !== "string") {
@@ -44,6 +32,10 @@ if (YOUR_USERNAME.includes("@")) {
   throw Error("❌  Please remove the @ from your username  ❌");
 }
 
-const model = mongoose.model(`Movie_${YOUR_USERNAME}`, MovieSchema);
+UserSchema.pre("save", async function () {
+  this.password = await bcrypt.hash(this.password, 5);
+});
+
+const model = mongoose.model(`User_${YOUR_USERNAME}`, UserSchema);
 
 export default model;
