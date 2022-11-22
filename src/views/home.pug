@@ -1,8 +1,9 @@
-extends templates/layout
+extends base
+include mixins/video
 
 block content
-  h2 #{loggedInUser.name}'s Profile
-  ul
-    li Name : #{loggedInUser.name}
-    li Username : #{loggedInUser.username}
-  hr
+    div.video-grid
+        each video in videos
+            +video(video)
+        else
+            span.empty__message No videos found
